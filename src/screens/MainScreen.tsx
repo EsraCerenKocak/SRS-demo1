@@ -3,8 +3,9 @@ import { View, StyleSheet, ScrollView, Text, KeyboardAvoidingView, Platform, Saf
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { theme } from '../theme';
-import { validateMachineHoursWithGemini } from '../services/gemini';
+// import { validateMachineHoursWithGemini } from '../services/gemini';
 import { MachineCounter } from '../models/MachineCounter';
+import { jobOrderService } from '../services/JobOrderService';
 
 // Örnek bir makine ve sayacı başlangıcı
 const SAMPLE_MACHINE_ID = 'MCH-1001';
@@ -17,7 +18,7 @@ export const MainScreen: React.FC = () => {
   const [successText, setSuccessText] = useState<string | undefined>(undefined);
   const [currentHours, setCurrentHours] = useState<number>(mockCounter.currentHours);
 
-  const handleValidate = async () => {
+  const handleValidate = () => {
     const newHours = parseFloat(hoursInput);
     if (isNaN(newHours)) {
       setErrorText('Lütfen geçerli bir sayı giriniz.');
@@ -25,8 +26,9 @@ export const MainScreen: React.FC = () => {
       return;
     }
 
-    if (newHours <= currentHours) {
-      setErrorText(`Hata: Yeni saat (${newHours}), mevcut saatten (${currentHours}) büyük olmalıdır.`);
+    const localValidation = mockCounter.validateNewHoursLocal(newHours);
+    if (!localValidation.isValid) {
+      setErrorText(localValidation.message);
       setSuccessText(undefined);
       return;
     }
@@ -35,18 +37,18 @@ export const MainScreen: React.FC = () => {
     setErrorText(undefined);
     setSuccessText(undefined);
 
-    const result = await validateMachineHoursWithGemini(SAMPLE_MACHINE_ID, currentHours, newHours);
-    
-    setIsLoading(false);
-
-    if (result.isValid) {
-      setSuccessText(result.message);
+    // Simulate small delay for UX
+    setTimeout(() => {
+      setIsLoading(false);
+      setSuccessText('Sayaç başarıyla güncellendi.');
       setCurrentHours(newHours);
       mockCounter.updateHours(newHours);
+      
+      // FR-PMS-01: Otomatik iş emri kontrolü
+      jobOrderService.generateJobsBasedOnHours(SAMPLE_MACHINE_ID, newHours);
+      
       setHoursInput(''); // Inputu temizle
-    } else {
-      setErrorText(result.message);
-    }
+    }, 500);
   };
 
   return (
