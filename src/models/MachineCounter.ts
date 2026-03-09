@@ -4,11 +4,17 @@ export class MachineCounter {
   public currentHours: number;
   public reportedAt: Date;
 
-  constructor(id: string, machineId: string, currentHours: number) {
+  constructor(
+    id: string,
+    machineId: string,
+    currentHours: number,
+    reportedAt?: Date,
+  ) {
     this.id = id;
     this.machineId = machineId;
     this.currentHours = currentHours;
-    this.reportedAt = new Date();
+    // reportedAt verilmezse şu anki zaman kullanılır
+    this.reportedAt = reportedAt ?? new Date();
   }
 
   public incrementHours(hoursAdded: number): void {

@@ -8,8 +8,16 @@ import { MachineCounter } from '../models/MachineCounter';
 import { jobOrderService } from '../services/JobOrderService';
 
 // Örnek bir makine ve sayacı başlangıcı
-const SAMPLE_MACHINE_ID = 'MCH-1001';
-const mockCounter = new MachineCounter('CNT-001', SAMPLE_MACHINE_ID, 12000);
+const SAMPLE_MACHINE_ID = "MCH-1001";
+// Son rapor 72 saat önce yapılmış kabul ediyoruz — demo'da makul sayaç artışlarını test edebilmek için
+const initialReportedAt = new Date();
+initialReportedAt.setHours(initialReportedAt.getHours() - 72);
+const mockCounter = new MachineCounter(
+  "CNT-001",
+  SAMPLE_MACHINE_ID,
+  12000,
+  initialReportedAt,
+);
 
 export const MainScreen: React.FC = () => {
   const [hoursInput, setHoursInput] = useState<string>('');
